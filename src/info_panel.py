@@ -1,7 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QTextEdit, QVBoxLayout
 from PyQt5.QtCore import Qt
+
 import os
 import time
+from xml_file_parser import XMLFileParser
 
 
 class InfoPanel(QWidget):
@@ -46,12 +48,7 @@ class InfoPanel(QWidget):
 
     def show_file(self, path: str):
         """Display information and a safe text preview for `path`.
-
-        - If the file is missing, shows a message.
-        - If the file appears binary (contains NUL bytes in the first chunk)
-          it will be reported as binary and not dumped.
-        - Otherwise the file is read as text (errors replaced) and truncated
-          to a reasonable size for display.
+        For .vti/.vtu files, show a summary of the XML structure using XMLFileParser.
         """
         if not path:
             self.set_info('No file selected')
@@ -69,17 +66,25 @@ class InfoPanel(QWidget):
 
             header = [f'File: {path}', f'Size: {format_size(size)}', f'Modified: {mtime}', f'Type: {ext or "(none)"}', '']
 
-            # detect binary-ish files by scanning the first bytes
+            if ext in ('.vti', '.vtu', '.xml'):
+                try:
+                    parser = XMLFileParser(path)
+                    parser.parse()
+                    xml_summary = parser.get_summary()
+                    body = f'XML Structure Summary:\n\n{xml_summary}'
+                except Exception as e:
+                    body = f'Failed to parse XML: {e}'
+                self.set_info('\n'.join(header + [body]))
+                return
+
+            # fallback to original text/binary preview for other files
             is_text = True
             with open(path, 'rb') as fh:
                 chunk = fh.read(2048)
                 if b'\x00' in chunk:
                     is_text = False
 
-            # allow common XML-like VTK files even if not strictly ASCII
-            xml_like = ext in ('.vti', '.vtu', '.xml')
-
-            if not is_text and not xml_like:
+            if not is_text:
                 body = 'Binary or non-text file; contents omitted.'
                 self.set_info('\n'.join(header + [body]))
                 return
