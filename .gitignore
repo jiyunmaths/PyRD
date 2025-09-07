@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+env/
+.venv/
+*.sqlite3
+*.pydevproject
+.idea/
+.vscode/
+*.swp
+*.swo
+*.DS_Store
+/.pytest_cache/
+coverage.xml
+htmlcov/
+pip-wheel-metadata/
+*.egg
+*.whl
+*.log
+/.mypy_cache/
+
+# virtual environment folders
+env/
+venv/
+.venv/
+
+# compiled dlls
+*.so
