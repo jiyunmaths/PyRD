@@ -1,0 +1,4 @@
+PyQt5>=5.15
+vtk>=9.0
+# Add vtk or pyvista if you want the full rendering experience
+# vtk
